@@ -89,45 +89,47 @@ def chemlibertexts_book_parser(url):
     total_chapter_titles = list(dict.fromkeys(chapter_titles + subchapter_titles))
     total_chapter_links = list(dict.fromkeys(chapter_links + subchapter_links))
     
+        
+    chapter_contents = total_chapter_titles 
     
     # in order to avoid duplicated looping over chapterlinks for the first types of book the following if conditions are applied
-    
-    book_contents = total_chapter_titles
     
     if len(chapter_links) > len(subchapter_links):
         for link in list(dict.fromkeys(chapter_links)):
             driver.get(link)
             driver.page_source
             chapter_container = driver.find_element(By.CLASS_NAME, 'mt-content-container')
-            subchapter_text_container = chapter_container.find_elements(By.TAG_NAME,'p') 
+            subchapter_text_container = chapter_container.find_elements(By.XPATH,'//*[@id="elm-main-content"]/section/p') 
             for subchap in subchapter_text_container:
-                 if subchap.text.strip() != '':
-                    book_contents.append(subchap.text.strip())
+                chapter_contents.append(subchap.text.strip())
     else:
         for link in total_chapter_links:
             driver.get(link)
             driver.page_source
             chapter_container = driver.find_element(By.CLASS_NAME, 'mt-content-container')
-            subchapter_text_container = chapter_container.find_elements(By.TAG_NAME,'p') 
+            subchapter_text_container = chapter_container.find_elements(By.XPATH,'//*[@id="elm-main-content"]/section/p') 
             for subchap in subchapter_text_container:
                 if subchap.text.strip() != '':
-                    book_contents.append(subchap.text.strip())
-            # tried to eliminate the texts containing url or Problem MP, but seemed do not work
+                total_chapter_titles.append(subchap.text.strip())
+                # tried to eliminate the texts containing url or Problem MP, but seemed do not work
                 #elif subchap.text.strip().find("https://") != -1:
                   #  pass
                 #elif subchap.text.strip().find("Problem MP") != -1:
                  #   continue
                 else:
                     pass
-                
     
-    # in oder to have more clean data, let's put all text's in a single list 
-    # and store that list with the name of the book
+    # again since we have slightly different data for the two differnt types of books, used following if condition to diffirentiate.
     
-    data = book_contents
+    #if len((chapter_links)) > len(subchapter_links):       
+     #   data = {'chap-title':chapter_titles,'chap-summary': chapter_summary,'chap-content':chapter_contents}
+    #else:
+    #    data = {'chap-title': total_chapter_titles,'chap-content':chapter_contents}
+    
+    # since the list "chapter_contents" contains all text files extracted, let's just store that one. 
     filename = book_title
     with open(filename, "w") as outfile:
-            json.dump(data, outfile)
-            
+            json.dump(chapter_contents, outfile)
+  
     print('Number of total chapters is', len(total_chapter_links))
-    return  driver.close()
+    return total_chapter_titles, driver.close()
