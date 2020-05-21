@@ -54,14 +54,38 @@ def selenium_html_collector(url, browser, path_to_driver, webdriver):
 
 
 
-# %%
-#Test Runs
-#import selenium
-#from selenium import webdriver
-#from selenium.webdriver.common.keys import Keys
+def book_finder(url, driver):               #SHOULD GET RID OF INITIALIZED LIST EVERY TIME PROGRAM RUN, ADD AS ARGUMENT
+    book_urls = []
+    urls = []
+    driver.get(url)
+    driver.implicitly_wait(random.randint(1,10))
+    #mt-sortable-listing-link mt-edit-section internal is the class name that gets all genres
+    #can do something recursive, where if <h1 .text contains "Book:" stop
+    
 
-#selenium_html_collector("https://www.wikipedia.org/", "Chrome", "C:/Users/bowri/Anaconda3/chromedriver", webdriver)
-#selenium_html_collector("https://www.wikipedia.org/", "Firefox", "")
+    sections = driver.find_elements_by_class_name("mt-sortable-listing-link mt-edit-section internal")
+    print(type(sections))
+    print(sections)
+    #if h1.text does not contain "Book:"
+    header = str(driver.find_element_by_xpath("//*[@id='title']").text)
+    print(header)
+        #for section in sections:
+        #    book_finder(section, driver)
+    print()
+    
+    for section in sections:
+        urls.append(str(section.get_attribute("href").text))
+
+                    
+    print(urls)
+    #else:
+        #for section in sections:
+            #book_url.append = href value(link)
+        
+    #return book_urls
+
+
+
 
 
 # %%

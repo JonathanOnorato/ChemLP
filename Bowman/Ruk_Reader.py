@@ -1,0 +1,126 @@
+# First let's import all the neccesery libararies and modules
+
+import pandas as pd
+from lxml import html
+import selenium
+from selenium import webdriver
+import random
+import time
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+import json
+from selenium.common.exceptions import StaleElementReferenceException 
+from selenium.common.exceptions import NoSuchElementException
+
+def chemlibertexts_book_parser(url):
+    """"This function takes one variable 'url' (a book chapter url from Chem.Libretexts)""" 
+    driver = webdriver.Chrome()
+    driver.implicitly_wait(random.randint(1,30)) 
+    driver.get(url)
+    driver.implicitly_wait(random.randint(1,100))
+    
+    # first the driver finds the title of the book and stores under variable 'book_title' which we use later as a filename to store the parsed data
+    book_title = driver.find_element(By.XPATH, '//*[@id="title"]').text.strip()
+    
+    # Next let's collect the hyperlinks of book chapters. 
+    # Depending on the style of books in the chemlibertexts website we need to use different webelements as seen blow;
+    # In order to avoid the 'NoSuchElementException' error 'try and except'conditions are used. 
+    # the first "try and except" is for books that we need to click to the table of contens page, requires two clicks and all chapters are listed under table of contens 
+    # the second "try and except" is for books (which is more common in the website) that have main-chapter-hyperlinks on the book homepage
+    # then we need to click mainchapter to get subchapterhyperlikns 
+    
+    chapter_titles = []
+    chapter_links = [] 
+    chapter_summary = []
+    try:
+        driver.find_element(By.CLASS_NAME, 'mt-icon-next-article').click()
+        driver.page_source
+        driver.find_element(By.XPATH, '//*[@title="Table of Contents"]').click()
+        chapter_content_container = driver.find_element(By.CLASS_NAME, 'mt-content-container')
+        chapter_link_container = chapter_content_container.find_elements(By.TAG_NAME,'a')
+        chapter_links = [link.get_attribute('href') for link in chapter_link_container]
+        chapter_titles = [link.text.strip() for link in chapter_link_container]
+        chapter_summary_container = chapter_container.find_elements(By.CLASS_NAME, 'summary')
+        chapter_summary = [summary.text.strip() for summary in chapter_summary_container]
+    except:
+        NoSuchElementException
+    
+    try:
+        chapter_container = driver.find_element(By.CLASS_NAME, 'mt-sortable-listings-container')
+        chapter_link_container = chapter_container.find_elements(By.TAG_NAME,'a')
+        for chapter_link in chapter_link_container:
+            if 'Front Matter' in chapter_link.get_attribute('title'):
+                pass
+            elif 'Back Matter' in chapter_link.get_attribute('title'):
+                pass
+    
+            else:
+                chapter_links.append(chapter_link.get_attribute('href'))
+                chapter_titles.append(chapter_link.get_attribute('title'))
+    except:
+        NoSuchElementException 
+            
+    print('Name of book', book_title, '\n', 'Number of chapters is', len(chapter_titles))
+    
+     # Following for loop go through the chapter_links collected above and looks for subchapter hyperlinks
+    # And also looks for overviews. Aagain, to avoid the 'NoSuchElementException' following 'try and except'condition is used
+    
+    subchapter_links = []
+    subchapter_titles = []
+    subchapter_link_container = []
+    
+    for chapter in list(dict.fromkeys(chapter_links)):
+        driver.get(chapter)
+        driver.page_source  
+        try:
+            subchapter_container = driver.find_element(By.CLASS_NAME, 'noindex')
+            subchapter_link_container = subchapter_container.find_elements(By.TAG_NAME,'a')
+            for link in subchapter_link_container:
+                subchapter_links.append(link.get_attribute('href'))
+                subchapter_titles.append(link.get_attribute('title'))
+        except:
+            NoSuchElementException
+            
+     # After collectong all chapter and subchapter links, let's combine all hyperlinks
+    # Before looping through the links let's remove duplicates;
+    # because for some books, all chapter hyperlinks including subchapters are given in one page;
+    # so that when we collect subchapters, we endup having the same list for two times!
+    
+    total_chapter_titles = list(dict.fromkeys(chapter_titles + subchapter_titles))
+    total_chapter_links = list(dict.fromkeys(chapter_links + subchapter_links))
+    
+        
+    chapter_contents = [] 
+    
+    # in order to avoid duplicated looping over chapterlinks for the first types of book the following if conditions are applied
+    
+    if len(chapter_links) > len(subchapter_links):
+        for link in list(dict.fromkeys(chapter_links)):
+            driver.get(link)
+            driver.page_source
+            chapter_container = driver.find_element(By.CLASS_NAME, 'mt-content-container')
+            subchapter_text_container = chapter_container.find_elements(By.XPATH,'//*[@id="elm-main-content"]/section/p') 
+            for subchap in subchapter_text_container:
+                chapter_contents.append(subchap.text.strip())
+    else:
+        for link in total_chapter_links:
+            driver.get(link)
+            driver.page_source
+            chapter_container = driver.find_element(By.CLASS_NAME, 'mt-content-container')
+            subchapter_text_container = chapter_container.find_elements(By.XPATH,'//*[@id="elm-main-content"]/section/p') 
+            for subchap in subchapter_text_container:
+                chapter_contents.append(subchap.text.strip())
+    
+    # again since we have slightly different data for the two differnt types of books, used following if condition to diffirentiate.
+    
+    if len((chapter_links)) > len(subchapter_links):       
+        data = {'chap-title':chapter_titles,'chap-summary': chapter_summary,'chap-content':chapter_contents}
+    else:
+        data = {'chap-title': total_chapter_titles,'chap-content':chapter_contents}
+    
+    filename = book_title
+    with open(filename, "w") as outfile:
+            json.dump(data, outfile)
+    print('Number of subchapters is', len(subchapter_links))
+    print('Number of total chapters is', len(total_chapter_links))
+    return chapter_links, chapter_titles, total_chapter_titles, driver.close()

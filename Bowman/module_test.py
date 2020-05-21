@@ -4,7 +4,18 @@
    "cell_type": "code",
    "execution_count": 3,
    "metadata": {},
-   "outputs": [],
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "'This program so far imports a variant of the functions we all made as BowFunks. It then takes a given start url, in this case a Chapter from\\nthe Schaller textbook, then goes through each subchapter(ie 1.1 etc) and gets all the content. Right now it just runs through one chapter. \\nTrying to broaden that.'"
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "from selenium import webdriver\n",
     "from selenium.webdriver.common.keys import Keys\n",
@@ -22,11 +33,16 @@
     "import Function1_2_3 as BowFunks  #this is locally on my computer, so just need to figure out a wait to generalize an import\n",
     "\n",
     "#Pseudocode her:\n",
-    "#first ask \"user\" for an initial url, basically the one thing we need to run the program\n",
+    "#first ask \"user\" for an initial url, basically the one thing we need to run the program, currently at the chapter level\n",
+    "    #kind of need to \"look under the hood\" here, can I just run Rukiya/Louisa's program at the Book interface to make it keep going thru\n",
+    "    #chapters?\n",
     "\n",
     "#Questions:\n",
     "#determine how many json's we're exporting?\n",
     "#Where do the other import things need to be, in the .py module that we're importing? or in this master function\n",
+    "#is there a benefit/loss to using Jupyter Notebook to edit a .py file\n",
+    "#how to generalize an import, ie BowFunks is Function1_2_3.py locally for me\n",
+    "#what needs to be changed in parser function, such that it works at a broader level\n",
     "\n",
     "#Basically summary:\n",
     "\"\"\"This program so far imports a variant of the functions we all made as BowFunks. It then takes a given start url, in this case a Chapter from\n",
@@ -36,27 +52,36 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 5,
+   "execution_count": 2,
    "metadata": {},
    "outputs": [
     {
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "Name of chapter 1: Monomers and Polymers \n",
-      " Number of subchapter is 9\n"
+      "<class 'list'>\n",
+      "Bookshelves\n",
+      "\n",
+      "[]\n"
      ]
     }
    ],
    "source": [
-    "url = \"https://chem.libretexts.org/Bookshelves/Organic_Chemistry/Book%3A_Polymer_Chemistry_(Schaller)/1%3A_Monomers_and_Polymers\"\n",
+    "url = \"https://chem.libretexts.org/Bookshelves\"\n",
     "\n",
-    "html_start = BowFunks.selenium_html_collector(url, \"Chrome\", \"C:/Users/bowri/Anaconda3/chromedriver\", webdriver)\n",
+    "#returns the driver(not the html, which confused me), of the given url\n",
+    "#html_start = BowFunks.selenium_html_collector(url, \"Chrome\", \"C:/Users/bowri/Anaconda3/chromedriver\", webdriver)\n",
     "\n",
-    "all_dict = BowFunks.chapter_text_parser(html_start)\n",
     "\n",
-    "BowFunks.new_exporter(all_dict, \"test_exe\", html_start, False)\n",
-    "\n"
+    "#this is storing a dictionary of all of chapter 1 of 1 book, need to start going through all books from this level\n",
+    "#all_dict = BowFunks.chapter_text_parser(html_start)\n",
+    "\n",
+    "#exports to single json of a chapter, or prints it out if you enter True into final default variable\n",
+    "#BowFunks.new_exporter(all_dict, \"test_exe\", html_start, True)\n",
+    "driver = webdriver.Chrome()\n",
+    "BowFunks.book_finder(url, driver)\n",
+    "\n",
+    "#//*[@id=\"title\"]"
    ]
   },
   {
