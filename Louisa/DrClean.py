@@ -9,10 +9,7 @@
 # *  <a href="https://www.geeksforgeeks.org/nlp-how-tokenizing-text-sentence-words-works/" target ="_black" >Tokenization </a>
 # ---------------------------
 
-# <code>Step 1:</code> Importing all the neccesary libraries
-
-# In[1]:
-
+# Step 1:Importing all the neccesary libraries
 
 import pandas as pd
 import re, string, unicodedata
@@ -29,13 +26,11 @@ from nltk.stem import LancasterStemmer, WordNetLemmatizer
 import numpy as np
 
 
-# <code>Step 2:</code> Openning, premilinary cleaning, and tokenizing the text data into sentences
-
-# In[7]:
+# Step 2: Openning, premilinary cleaning, and tokenizing the text data into sentences
 
 
 def open_clean_tokenize(filepath):
-    """ filepath is the path to the json file to be openned. This function opens the file, do some basic cleaning (makes text lowercase, remoeves  and removes unwanted symboles and tokenize the data in to sentences
+    """ filepath is the path to the json file to be openned. This function opens the file, do some basic cleaning (makes text lowercase, removes  and removes unwanted symboles and tokenize the data in to sentences
 """
     with open(filepath) as json_file:
         corpus = json.load(json_file)
@@ -52,9 +47,7 @@ def open_clean_tokenize(filepath):
     return clean_tokenize
 
 
-# <code>Step 3:</code> Further cleaning (remove punctuations, numbers, and stop words) the tokenized data in setp 2 for to use in Word2vec
-
-# In[8]:
+# Step 3: Further cleaning (remove punctuations, numbers, and stop words) the tokenized data in setp 2 for to use in Word2vec
 
 
 def remove_punctuation(corpus):
@@ -93,14 +86,16 @@ def normalize(corpus):
     return corpus
 
 
-# <code> Step 4:</code> Let's run the above two functions as below
+# Step 4: Let's run the above two functions as below
+# example: 
+# 	  filepath = 'Basic Principles of Organic Chemistry_Roberts and Caserio'
+# 	  corpus = open_clean_tokenize(filepath)
+# 	  tokens = normalize(corpus)
+#
 
 # ## Stemming and lemmatization
 # 
 # We can further process the cleanned and tokenized data as follows:
-
-# In[10]:
-
 
 def stem_words(tokens):
     """Stem words in list of tokenized words"""
@@ -122,16 +117,13 @@ def lemmatize_verbs(tokens):
     return lemmas
 
 
-# In[11]:
-
-
 def stem_and_lemmatize(tokens):
     stems = stem_words(tokens)
     lemmas = lemmatize_verbs(tokens)
     return stems, lemmas
 
 
-# In[ ]:
+#example: final_data = stem_and_lemmatize(tokens)
 
 
 
