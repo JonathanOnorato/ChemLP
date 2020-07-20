@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[7]:
+# In[1]:
 
 
 import re, string 
@@ -13,6 +13,8 @@ from sklearn.manifold import TSNE
 from nltk.corpus import stopwords
 STOPWORDS = set(stopwords.words('english'))
 from gensim.models import Word2Vec
+from gensim.test.utils import get_tmpfile
+from gensim.models import KeyedVectors
 import matplotlib.pyplot as plt
 from nltk.stem import WordNetLemmatizer
 from nltk import sent_tokenize
@@ -67,23 +69,26 @@ def lemmatizer(text):
     return " ".join(sent)
 
 
-# In[10]:
+# In[5]:
 
 
 
 def feed2vec(filepath, tokenize=None):
     global sentences, tokens
     
+    print("filepath is ", str(filepath))
     #Creates a pandas dataframe for the text data from a json file
-    #df = pd.read_json(filepath)
+    if ".json" in str(filepath):
+        df = pd.read_json(filepath)
     
-    
+    else:   
     #FIXING THE READ JSON THING HERE W LOADING IT THEN WRITING? BC ABOVE IS GIVING ME A VALUE ERROR THAT'S HARD TO FIX
-    with open(filepath, "r") as read_file:
-        dataInit = json.load(read_file)
-    df = pd.DataFrame(data = dataInit)
+        with open(filepath, "r") as read_file:
+            dataInit = json.load(read_file)
+        df = pd.DataFrame(data = dataInit)
     
-    print("data init is ", type(dataInit))
+    #print("data type loaded from json is ", type(dataInit))
+    print(df.head(n = 10))
     
     #Adds the column label text
     df.columns = ['text']
@@ -97,7 +102,7 @@ def feed2vec(filepath, tokenize=None):
     #this is so later on only the copy is modified and there is no confusion between the copy and the original
     master_of_none = df_clean.loc[df_clean.text.notnull()].copy()
     
-    if tokenize == None:
+    if tokenize == None:   #no tokenizing at all
         tokens = None
         #Lemmatizer function is applied to cleaned text with the none values removed
         master_of_none["text_lemmatized"] =  master_of_none.apply(lambda x: lemmatizer(x['text']), axis=1)
@@ -111,7 +116,7 @@ def feed2vec(filepath, tokenize=None):
                 word_freq[i] += 1
         len(word_freq)
         
-    else:
+    else:   #returns sentences as tokens
         tokens = []
         sentences = sent_tokenize(str(master_of_none["text"]))
         word_freq = defaultdict(int)
@@ -122,14 +127,14 @@ def feed2vec(filepath, tokenize=None):
         len(word_freq)
     
 
-    return print(tokens)
+    return tokens              #removed the print from here
 
 
-# In[6]:
+# In[15]:
 
 
-def w2v_train(w2vmodel, last_model = False):
-    global sentences, tokens
+def w2v_train(w2vmodel, last_model = False, min_count = 20, window = 5, size = 500):   #maybe pass in default variables here for easier optimization
+    global sentences, tokens   #does global work if I'm calling this program full of functions
     if tokens is not None:
         words = tokens
     else:
@@ -147,22 +152,46 @@ def w2v_train(w2vmodel, last_model = False):
         # window: the maximum distance between the current and predicted word within a sentence.
         # size: the dimensionality of the feature vectors
         # workers: the number of cores your computer has
-        w2v_model = Word2Vec(min_count=20,
-                             window=5,
-                             size=400,
-                             workers=2)
+        w2v_model = Word2Vec(min_count = min_count,
+                             window = window,
+                             size = size)                    #removed workers var from here and default settings
         #the new model's vocabulary is built 
         w2v_model.build_vocab(words)
         
     # train word vectors
     #returns the number of words in the vocab and the number of words in the corpus
     try:
-        w2v_model.train(words, total_examples=w2v_model.corpus_count, epochs=w2v_model.epochs)
+        t = time()
+        w2v_model.train(words, total_examples=w2v_model.corpus_count, epochs= 30, report_delay = 1)       #w2v_model.epochs
+        
     except RuntimeError:
         print("Vocab was not built. Check your w2v parameters and try again!")
     #either the new or updated version of the w2v model is saved
+    
+    print("made it here!")
+    print('Time to train the model: {} mins'.format(round((time() - t) / 60, 2))) #added here
+    
+    
+    fname = get_tmpfile("vectors.kv")
+    word_vectors = []
+    word_vectors = w2v_model.wv
+    word_vectors.save(fname)
+    word_vectors = KeyedVectors.load(fname, mmap='r')
+    
+    #print(w2v_model.wv.vocab[:100])            #added here
+    all_vectors = []
+    print("corpus count is ", w2v_model.corpus_count)
+    print("epochs is ", w2v_model.epochs)
+    for word in w2v_model.wv.vocab:
+        #print(word)
+        all_vectors.append(w2v_model.wv[word])  #to here
+
     w2v_model.save(w2vmodel)
-    return print("Training complete!")
+    print("keyed vectors ", word_vectors)
+    print("all_vectors(done via vocab) ", all_vectors)
+    #return print("Training complete!")
+    
+    return word_vectors                   #added this
     
 
 
@@ -323,7 +352,7 @@ model20 = 'koltzsenburg_maskos_and_nuyken.model'
 #w2v_train(model1)
 
 
-# In[19]:
+# In[13]:
 
 
 #feed2vec(file2, tokenize=True)
