@@ -24,7 +24,7 @@ import json
 import torch
 from transformers import BertModel, BertConfig, BertTokenizer, PreTrainedTokenizer
 import csv
-
+import numpy as np
 
 # In[2]:
 
@@ -263,26 +263,37 @@ def data_saver(excel_file, my_headers, new_file = None):
 # In[9]:
 
 
-def tsne_grapher(w2vmodel):
+def tsne_grapher(w2vmodel, word):
     "Create TSNE model and plot it"
-    labels = []
-    tokens = []
-    model = Word2Vec.load(w2vmodel)
-
-    for word in model.wv.vocab:
-        tokens.append(model[word])
-        labels.append(word)
+    labels = [word]
     
-    tsne_model = TSNE(perplexity=40, n_components=2, init='pca', n_iter=2500, random_state=23)
-    new_values = tsne_model.fit_transform(tokens)
+    #Create an empty array with numpy
+    arr = np.empty((0,400), dtype='f')
+    
+    model = Word2Vec.load(w2vmodel)
+    vocab = model.wv.most_similar(word)
+    
+    # add the vector for each of the closest words to the array
+    #arr = np.append(arr, np.array([model[word_embed]]), axis=0)
+    for word_embed in vocab:
+        vectors = model[word_embed[0]]
+        labels.append(word_embed[0])
+        arr = np.append(arr, np.array([vectors]), axis=0)
+        
+        
+    
+    tsne_model = TSNE(n_components=3, perplexity=90, init='pca', early_exaggeration=12, learning_rate=100, n_iter=1000) 
+    np.set_printoptions(suppress=True)
+    new_values = tsne_model.fit_transform(arr)
 
     x = []
     y = []
     for value in new_values:
         x.append(value[0])
         y.append(value[1])
-        
-    plt.figure(figsize=(18, 18)) 
+    
+    
+    plt.figure(figsize=(20, 20)) 
     for i in range(len(x)):
         plt.scatter(x[i],y[i])
         plt.annotate(labels[i],
@@ -291,9 +302,15 @@ def tsne_grapher(w2vmodel):
                      textcoords='offset points',
                      ha='right',
                      va='bottom')
+    plt.grid(True)
+    plt.xticks(fontsize=24)
+    plt.yticks(fontsize=24)
+    plt.tick_params(length=20)
+    plt.xlabel("cos sim", fontsize=24)
+    plt.ylabel("cos sim", fontsize=24)
+    plt.title("Test plot", fontsize=36)
     plt.show()
     return
-
 
 # In[10]:
 

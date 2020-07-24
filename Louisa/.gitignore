@@ -1,0 +1,10 @@
+*.ipynb_checkpoints
+*.ipynb_checkpoints/w2v_functions-checkpoint.ipynb
+*.model
+*.csv
+*.json
+*Springer_PDF/
+*../Completed_Word2Vec/.ipynb_checkpoints/Louisa_w2v_functions-checkpoint.py
+*tutorial_practice/
+*Bowman/Completed_Word2Vec/.ipynb_checkpoints/Louisa_w2v_functions-checkpoint.py
+
