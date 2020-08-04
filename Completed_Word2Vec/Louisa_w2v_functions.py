@@ -24,6 +24,8 @@ import json
 import torch
 from transformers import BertModel, BertConfig, BertTokenizer, PreTrainedTokenizer
 import csv
+import logging  # Setting up the loggings to monitor gensim
+logging.basicConfig(format="%(levelname)s - %(asctime)s: %(message)s", datefmt= '%H:%M:%S', level=logging.INFO)
 
 
 # In[2]:
@@ -180,18 +182,22 @@ def w2v_train(w2vmodel, last_model = False, min_count = 20, window = 5, size = 5
     
     #print(w2v_model.wv.vocab[:100])            #added here
     all_vectors = []
+    all_words = []
     print("corpus count is ", w2v_model.corpus_count)
     print("epochs is ", w2v_model.epochs)
     for word in w2v_model.wv.vocab:
-        #print(word)
+        all_words.append(word)
         all_vectors.append(w2v_model.wv[word])  #to here
 
     w2v_model.save(w2vmodel)
     print("keyed vectors ", word_vectors)
     print("all_vectors(done via vocab) ", all_vectors)
+    print("all_vectors type is ", type(all_vectors))
+    print("all words in wv.vocab are ", all_words)
+    print("number of words in wv.vocab is ", len(all_words))
     #return print("Training complete!")
     
-    return word_vectors                   #added this
+    return all_vectors                  #added this
     
 
 
