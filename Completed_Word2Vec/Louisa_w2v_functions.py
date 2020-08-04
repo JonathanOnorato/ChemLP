@@ -139,7 +139,7 @@ def feed2vec(filepath, tokenize=None):
         len(word_freq)
     
 
-    return tokens              #removed the print from here
+    return tokens             
 
 
 # In[15]:
@@ -147,7 +147,7 @@ def feed2vec(filepath, tokenize=None):
 
 def w2v_train(w2vmodel, last_model = False, min_count = 2, window = 5, size = 500):   
     '''This function is designed to train word2vec from gensim on your text corpus that you prepared in the feed2vec function. Default variables for w2v to use are already given.
-    You can specifiy them if you want. Both w2vmodel and last_model should be saved in model_name_here.model format. The variable w2vmodel is the name of the new model that you want to     save it as. If you are adding a text corpus to a previous model, then the name of the previous model should be listed in the last_model variable. '''
+    You can specifiy them if you want. Both w2vmodel and last_model should be saved in model_name_here.model format. The variable w2vmodel is the name of the new model that you want to save it as. If you are adding a text corpus to a previous model, then the name of the previous model should be listed in the last_model variable. '''
     global sentences, tokens #makes the variables visible to other functions instead of local to that function
     if tokens is not None:
         words = tokens
@@ -267,7 +267,7 @@ def cosine_sim(w2vmodel, first_word, second_word, t10):
         w2v_data.append(top10)
     except KeyError:
         top10 = 0
-        print(t10 "is not in the vocabulary")
+        print(t10, "is not in the vocabulary")
     
     
     return print("Data collection and saving complete!")
