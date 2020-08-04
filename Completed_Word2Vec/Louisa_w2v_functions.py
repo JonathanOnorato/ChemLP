@@ -24,9 +24,13 @@ import json
 import torch
 from transformers import BertModel, BertConfig, BertTokenizer, PreTrainedTokenizer
 import csv
+<<<<<<< HEAD
 import logging  # Setting up the loggings to monitor gensim
 logging.basicConfig(format="%(levelname)s - %(asctime)s: %(message)s", datefmt= '%H:%M:%S', level=logging.INFO)
 
+=======
+import numpy as np
+>>>>>>> 46769c028c6b0d718eba6acb2ba5abc1d48e45c5
 
 # In[2]:
 
@@ -49,6 +53,7 @@ def clean_text(text):
 
 
 def tokenizer(text):
+    '''Function to use the Bert Tokenizer to tokenize the words in the corpus'''
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
     tokens = tokenizer.tokenize(str(text), add_special_tokens=True)
     return tokens
@@ -60,6 +65,7 @@ def tokenizer(text):
 nlp = spacy.load('en_core_web_sm')
 
 def lemmatizer(text):
+    '''Function to lemmatize the words in the corpus with spacy if tokenizing is not used'''
     if text == None:
         print("Excuse me but there is an unexpected None value from cleaning the text!")
         return ""
@@ -76,6 +82,10 @@ def lemmatizer(text):
 
 
 def feed2vec(filepath, tokenize=None):
+    '''Feed2vec prepares the text corpus for word2vec to train on. It first takes a JSON filepath and puts it into a pandas data frame
+       Then it cleans the text using the clean_text function. Afterwards, all of the rows with None values are removed.
+       The default is to not use the tokenie function. If one sets tokenize = True, then the tokenizer function will use BERT to tokenize 
+       the text corpus one sentence at a time. All tokens are appended to a tokens list. '''
     global sentences, tokens
     
     print("filepath is ", str(filepath))
@@ -118,7 +128,7 @@ def feed2vec(filepath, tokenize=None):
                 word_freq[i] += 1
         len(word_freq)
         
-    else:   #returns sentences as tokens
+    else:   #returns sentences as tokens using the BERT tokenizer function
         tokens = []
         sentences = sent_tokenize(str(master_of_none["text"]))
         word_freq = defaultdict(int)
@@ -135,8 +145,10 @@ def feed2vec(filepath, tokenize=None):
 # In[15]:
 
 
-def w2v_train(w2vmodel, last_model = False, min_count = 20, window = 5, size = 500):   #maybe pass in default variables here for easier optimization
-    global sentences, tokens   #does global work if I'm calling this program full of functions
+def w2v_train(w2vmodel, last_model = False, min_count = 2, window = 5, size = 500):   
+    '''This function is designed to train word2vec from gensim on your text corpus that you prepared in the feed2vec function. Default variables for w2v to use are already given.
+    You can specifiy them if you want. Both w2vmodel and last_model should be saved in model_name_here.model format. The variable w2vmodel is the name of the new model that you want to     save it as. If you are adding a text corpus to a previous model, then the name of the previous model should be listed in the last_model variable. '''
+    global sentences, tokens #makes the variables visible to other functions instead of local to that function
     if tokens is not None:
         words = tokens
     else:
@@ -156,37 +168,50 @@ def w2v_train(w2vmodel, last_model = False, min_count = 20, window = 5, size = 5
         # workers: the number of cores your computer has
         w2v_model = Word2Vec(min_count = min_count,
                              window = window,
-                             size = size)                    #removed workers var from here and default settings
+                             size = size)                    
         #the new model's vocabulary is built 
         w2v_model.build_vocab(words)
         
-    # train word vectors
-    #returns the number of words in the vocab and the number of words in the corpus
+    # trains the built vocab on the w2v model
+    
     try:
         t = time()
         w2v_model.train(words, total_examples=w2v_model.corpus_count, epochs= 30, report_delay = 1)       #w2v_model.epochs
         
     except RuntimeError:
         print("Vocab was not built. Check your w2v parameters and try again!")
-    #either the new or updated version of the w2v model is saved
+    #Sometimes there is a RuntimeError stating that the vocab needs to be built first.
+    #This problem occurs when the Word2Vec parameters end up excluding all words in the text corpus.
+    #The default variables may not work in some cases, so you may have to manually specify.
     
-    print("made it here!")
+    #This tells you how long it took to train the model
     print('Time to train the model: {} mins'.format(round((time() - t) / 60, 2))) #added here
     
-    
+   #Trained word vectors are stored in a KeyedVectors instance
+    #This object is smaller and faster to load.Thereby making it easier to share the vectors here. 
     fname = get_tmpfile("vectors.kv")
     word_vectors = []
     word_vectors = w2v_model.wv
     word_vectors.save(fname)
     word_vectors = KeyedVectors.load(fname, mmap='r')
     
-    #print(w2v_model.wv.vocab[:100])            #added here
     all_vectors = []
+<<<<<<< HEAD
     all_words = []
+=======
+    
+    #returns the number of words in the vocab and the number of words in the corpus
+>>>>>>> 46769c028c6b0d718eba6acb2ba5abc1d48e45c5
     print("corpus count is ", w2v_model.corpus_count)
     print("epochs is ", w2v_model.epochs)
+    
+    #Puts all vectors in model in the all vectors list
     for word in w2v_model.wv.vocab:
+<<<<<<< HEAD
         all_words.append(word)
+=======
+        
+>>>>>>> 46769c028c6b0d718eba6acb2ba5abc1d48e45c5
         all_vectors.append(w2v_model.wv[word])  #to here
 
     w2v_model.save(w2vmodel)
@@ -197,25 +222,27 @@ def w2v_train(w2vmodel, last_model = False, min_count = 20, window = 5, size = 5
     print("number of words in wv.vocab is ", len(all_words))
     #return print("Training complete!")
     
+<<<<<<< HEAD
     return all_vectors                  #added this
+=======
+    return word_vectors                   
+>>>>>>> 46769c028c6b0d718eba6acb2ba5abc1d48e45c5
     
-
-
-# In[ ]:
-
-
-
-
-
-# In[7]:
 
 
 
 first_word = ['alcohol', 'ketone', 'alkene', 'carbon', 'proton', 'polymer', 'acid', 'oxidize', 'anion', 'electrophile', 'polar', 'positive', 'mechanism', 'resonance', 'synthesis', 'isomer', 'heat', 'aromatic', ]
 second_word = ['hydroxyl', 'carbonyl', 'alkyne', 'nitrogen', 'hydrogen', 'chain', 'base', 'reduce', 'cation', 'nucleophile', 'nonpolar', 'negative', 'atom', 'solvent', 'electron', 'reaction', 'bond', 'equilibrium']
 my_headers = ['model_name', 'alcohol + hydroxyl', 'ketone + carbonyl', 'alkene + alkyyne', 'carbon + nitrogen', 'proton + hydrogen', 'polymer + chain', 'acid + base', 'oxidize + reduce', 'anion + cation', 'electrophile + nucleophile', 'polar + nonpolar', 'positive + negative', 'mechanism + atom', 'resonance + solvent', 'synthesis + electron', 'isomer + reaction', 'heat + bond', 'aromatic + equilibrium', 'Top 10 Carbon']
+t10 = 'carbon'
 
-def cosine_sim(w2vmodel, first_word, second_word):
+def cosine_sim(w2vmodel, first_word, second_word, t10):
+    '''The variable w2vmodel is the model that you want to get the cosine similarity values from. There are defaults values for first_word, second_word, and t10 in the file. You can
+    specify your own values for each variable too. Just make sure the words are in ''. 
+    
+    First, the name of the model is added to the w2v_data list, so there is a model associated with the cosine sim data. Then 2 lists called first_word and second_word are zipped 
+    together to form word pairs.For each word pair, the cos sim is calculated, and the value is added to the w2v_data list. This is also done for the top10 most similar words to the t10 
+    value. Note the default t10 is carbon.'''
     global w2v_data
     model_name = w2vmodel
     
@@ -236,11 +263,11 @@ def cosine_sim(w2vmodel, first_word, second_word):
             print(f"{word1} or {word2} was not in the vocabulary")
    
     try:
-        top10 = w2v_model.wv.most_similar(positive=['carbon'])
+        top10 = w2v_model.wv.most_similar(positive=[t10])
         w2v_data.append(top10)
     except KeyError:
         top10 = 0
-        print("carbon is not in the vocabulary")
+        print(t10 "is not in the vocabulary")
     
     
     return print("Data collection and saving complete!")
@@ -251,6 +278,9 @@ def cosine_sim(w2vmodel, first_word, second_word):
 
 
 def data_saver(excel_file, my_headers, new_file = None):
+    '''The data_saver function takes the w2v_data from cosine_sim function and adds them to a CSV file. The variable excel_file is the name of the CSV file that you want to save
+    the data to. The variable my_headers is a list of the csv headers that correspond to each word pair in the cosine_sim function. One needs to specify new_file if you are not adding 
+    to a previously made CSV file. '''
     try:
         if new_file is not None:
             with open(excel_file, 'w',  newline='') as csvfile:
@@ -269,26 +299,37 @@ def data_saver(excel_file, my_headers, new_file = None):
 # In[9]:
 
 
-def tsne_grapher(w2vmodel):
+def tsne_grapher(w2vmodel, word):
     "Create TSNE model and plot it"
-    labels = []
-    tokens = []
-    model = Word2Vec.load(w2vmodel)
-
-    for word in model.wv.vocab:
-        tokens.append(model[word])
-        labels.append(word)
+    labels = [word]
     
-    tsne_model = TSNE(perplexity=40, n_components=2, init='pca', n_iter=2500, random_state=23)
-    new_values = tsne_model.fit_transform(tokens)
+    #Create an empty array with numpy
+    arr = np.empty((0,400), dtype='f')
+    
+    model = Word2Vec.load(w2vmodel)
+    vocab = model.wv.most_similar(word)
+    
+    # add the vector for each of the closest words to the array
+    #arr = np.append(arr, np.array([model[word_embed]]), axis=0)
+    for word_embed in vocab:
+        vectors = model[word_embed[0]]
+        labels.append(word_embed[0])
+        arr = np.append(arr, np.array([vectors]), axis=0)
+        
+        
+    
+    tsne_model = TSNE(n_components=3, perplexity=90, init='pca', early_exaggeration=12, learning_rate=100, n_iter=1000) 
+    np.set_printoptions(suppress=True)
+    new_values = tsne_model.fit_transform(arr)
 
     x = []
     y = []
     for value in new_values:
         x.append(value[0])
         y.append(value[1])
-        
-    plt.figure(figsize=(18, 18)) 
+    
+    
+    plt.figure(figsize=(20, 20)) 
     for i in range(len(x)):
         plt.scatter(x[i],y[i])
         plt.annotate(labels[i],
@@ -297,9 +338,15 @@ def tsne_grapher(w2vmodel):
                      textcoords='offset points',
                      ha='right',
                      va='bottom')
+    plt.grid(True)
+    plt.xticks(fontsize=24)
+    plt.yticks(fontsize=24)
+    plt.tick_params(length=20)
+    plt.xlabel("cos sim", fontsize=24)
+    plt.ylabel("cos sim", fontsize=24)
+    plt.title("Test plot", fontsize=36)
     plt.show()
     return
-
 
 # In[10]:
 
@@ -349,23 +396,6 @@ model17 = 'b_carey_and_sundberg.model'
 model18 = 'ravve.model'
 model19 = 'braun_chedron_rehahn_ritter_and_voit.model'
 model20 = 'koltzsenburg_maskos_and_nuyken.model'
-
-
-# In[12]:
-
-
-#feed2vec(file1)
-#w2v_train(model1)
-
-
-# In[13]:
-
-
-#feed2vec(file2, tokenize=True)
-#w2v_train(model2, last_model = False)
-
-
-# In[ ]:
 
 
 

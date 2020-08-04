@@ -1,0 +1,4 @@
+*.csv
+*.pdf
+*.ipynb-checkpoints
+*Completed_Word2Vec/.ipynb_checkpoints/Louisa_w2v_functions-checkpoint.py
