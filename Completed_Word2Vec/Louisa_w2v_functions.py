@@ -24,13 +24,13 @@ import json
 import torch
 from transformers import BertModel, BertConfig, BertTokenizer, PreTrainedTokenizer
 import csv
-<<<<<<< HEAD
+#<<<<<<< HEAD
 import logging  # Setting up the loggings to monitor gensim
 logging.basicConfig(format="%(levelname)s - %(asctime)s: %(message)s", datefmt= '%H:%M:%S', level=logging.INFO)
 
-=======
+
 import numpy as np
->>>>>>> 46769c028c6b0d718eba6acb2ba5abc1d48e45c5
+#>>>>>>> 46769c028c6b0d718eba6acb2ba5abc1d48e45c5
 
 # In[2]:
 
@@ -145,7 +145,7 @@ def feed2vec(filepath, tokenize=None):
 # In[15]:
 
 
-def w2v_train(w2vmodel, last_model = False, min_count = 2, window = 5, size = 500):   
+def w2v_train(w2vmodel, last_model = False, min_count = 2, window = 5, size = 500, keyed_vecs = False):   
     '''This function is designed to train word2vec from gensim on your text corpus that you prepared in the feed2vec function. Default variables for w2v to use are already given.
     You can specifiy them if you want. Both w2vmodel and last_model should be saved in model_name_here.model format. The variable w2vmodel is the name of the new model that you want to save it as. If you are adding a text corpus to a previous model, then the name of the previous model should be listed in the last_model variable. '''
     global sentences, tokens #makes the variables visible to other functions instead of local to that function
@@ -196,37 +196,43 @@ def w2v_train(w2vmodel, last_model = False, min_count = 2, window = 5, size = 50
     word_vectors = KeyedVectors.load(fname, mmap='r')
     
     all_vectors = []
-<<<<<<< HEAD
+#<<<<<<< HEAD
     all_words = []
-=======
+#=======
     
     #returns the number of words in the vocab and the number of words in the corpus
->>>>>>> 46769c028c6b0d718eba6acb2ba5abc1d48e45c5
+#>>>>>>> 46769c028c6b0d718eba6acb2ba5abc1d48e45c5
     print("corpus count is ", w2v_model.corpus_count)
     print("epochs is ", w2v_model.epochs)
     
     #Puts all vectors in model in the all vectors list
     for word in w2v_model.wv.vocab:
-<<<<<<< HEAD
+#<<<<<<< HEAD
+        vector = []
         all_words.append(word)
-=======
+#=======
+        vector = w2v_model.wv[word]
+        #vector += [word]
+        #print([vector])
+#>>>>>>> 46769c028c6b0d718eba6acb2ba5abc1d48e45c5
+        all_vectors.append(vector)#       (w2v_model.wv[word])  #to here
+        #all_vectors.append([word])
         
->>>>>>> 46769c028c6b0d718eba6acb2ba5abc1d48e45c5
-        all_vectors.append(w2v_model.wv[word])  #to here
-
     w2v_model.save(w2vmodel)
+    #final_list = zip(all_words, all_vectors)
     print("keyed vectors ", word_vectors)
-    print("all_vectors(done via vocab) ", all_vectors)
-    print("all_vectors type is ", type(all_vectors))
     print("all words in wv.vocab are ", all_words)
     print("number of words in wv.vocab is ", len(all_words))
     #return print("Training complete!")
     
-<<<<<<< HEAD
-    return all_vectors                  #added this
-=======
-    return word_vectors                   
->>>>>>> 46769c028c6b0d718eba6acb2ba5abc1d48e45c5
+#<<<<<<< HEAD
+    if keyed_vecs == False:
+        return all_vectors                  #added this
+        #return final_list
+#=======
+    else:
+        return word_vectors                   
+#>>>>>>> 46769c028c6b0d718eba6acb2ba5abc1d48e45c5
     
 
 
