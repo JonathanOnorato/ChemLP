@@ -212,8 +212,8 @@ def w2v_train(w2vmodel, last_model = False, min_count = 2, window = 5, size = 50
         all_words.append(word)
 #=======
         vector = w2v_model.wv[word]
-        #vector += [word]
-        #print([vector])
+        vector = vector.tolist()
+    
 #>>>>>>> 46769c028c6b0d718eba6acb2ba5abc1d48e45c5
         all_vectors.append(vector)#       (w2v_model.wv[word])  #to here
         #all_vectors.append([word])
@@ -227,11 +227,26 @@ def w2v_train(w2vmodel, last_model = False, min_count = 2, window = 5, size = 50
     
 #<<<<<<< HEAD
     if keyed_vecs == False:
-        return all_vectors                  #added this
+        
+     #return all_vectors                  #added this
         #return final_list
+        #all_vectors = all_vectors.tolist()
+        print("type of all vectors is: ", type(all_vectors))
+        final_dict = {}
+        final_dict = {"embeddings": all_vectors, "words/tokens": all_words}
+        #final_dict = dict(zip(all_words, all_vectors))
+        #print(final_dict)
+        return final_dict
+    
 #=======
     else:
-        return word_vectors                   
+        #word_embed_dual_list = []
+        #word_embed_dual_list.append(word_vectors)
+        #word_embed_dual_list.append(all_words)
+        #return word_embed_dual_list
+    
+        return word_vectors
+    
 #>>>>>>> 46769c028c6b0d718eba6acb2ba5abc1d48e45c5
     
 
